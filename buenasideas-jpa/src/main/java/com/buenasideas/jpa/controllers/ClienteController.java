@@ -2,7 +2,11 @@ package com.buenasideas.jpa.controllers;
 
 import com.buenasideas.jpa.models.entity.Cliente;
 import com.buenasideas.jpa.services.IClienteService;
+import com.buenasideas.jpa.utils.paginator.PageRender;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,10 +25,16 @@ public class ClienteController {
     private IClienteService service;
 
     @RequestMapping(value = "/listar", method = RequestMethod.GET)
-    public String getCliente(Model model){
+    public String getCliente(@RequestParam(value = "page", defaultValue = "0") int page, Model model){
+
+        Pageable pageRequest = PageRequest.of(page, 5);
+        Page<Cliente> clientes = service.findAll(pageRequest);
+        PageRender<Cliente> pageRender = new PageRender("/listar", clientes);
+
         model.addAttribute("titulo", "JPA-App");
         model.addAttribute("titulo_text", "Listado de Clientes");
-        model.addAttribute("list_clientes", service.findAll());
+        model.addAttribute("list_clientes", clientes);
+        model.addAttribute("page", pageRender);
         return "listar";
     }
 
